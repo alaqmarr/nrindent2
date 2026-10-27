@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    background-color: #faf8f5;
+    color: #14171f;
+    font-family: var(--font-sans), sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display), sans-serif;
+    letter-spacing: -0.025em;
+  }
+
+  .font-mono {
+    font-family: var(--font-mono), monospace;
+  }
+}

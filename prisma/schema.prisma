@@ -1,0 +1,167 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("ADMIN") // ADMIN, MANAGER, EDITOR
+  phone        String?
+  avatar       String?
+  isActive     Boolean  @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Category {
+  id               String    @id @default(cuid())
+  name             String
+  slug             String    @unique
+  shortDescription String?
+  description      String?
+  image            String?
+  bannerImage      String?
+  featured         Boolean   @default(false)
+  isActive         Boolean   @default(true)
+  sortOrder        Int       @default(0)
+  metaTitle        String?
+  metaDescription  String?
+  metaKeywords     String?
+  products         Product[]
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model Product {
+  id               String    @id @default(cuid())
+  name             String
+  slug             String    @unique
+  sku              String?
+  shortDescription String?
+  description      String
+  image            String?
+  gallery          String    @default("[]") // JSON array of image URLs
+  specifications   String    @default("[]") // JSON array of { label: string, value: string }
+  features         String    @default("[]") // JSON array of strings
+  applications     String    @default("[]") // JSON array of strings
+  priceLabel       String?   @default("Request a Quote")
+  minOrderQty      String?   @default("1 Unit")
+  unit             String?   @default("Piece")
+  inStock          Boolean   @default(true)
+  featured         Boolean   @default(false)
+  isActive         Boolean   @default(true)
+  sortOrder        Int       @default(0)
+  brochureUrl      String?
+  metaTitle        String?
+  metaDescription  String?
+  metaKeywords     String?
+  categoryId       String
+  category         Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  inquiries        Inquiry[]
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+}
+
+model Inquiry {
+  id          String   @id @default(cuid())
+  type        String   @default("PRODUCT_EMAIL") // PRODUCT_EMAIL, PRODUCT_WHATSAPP, CONTACT_FORM
+  name        String
+  email       String
+  phone       String?
+  company     String?
+  subject     String?
+  message     String
+  quantity    String?
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productName String?
+  productSku  String?
+  status      String   @default("NEW") // NEW, IN_PROGRESS, RESOLVED, ARCHIVED
+  adminNotes  String?
+  emailSent   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SiteSettings {
+  id                    String   @id @default("default")
+  // Company & About
+  companyName           String   @default("NR Industrial Enterprises")
+  tagline               String   @default("House Of Industrial Supplies")
+  logoUrl               String?  @default("/logo.png")
+  faviconUrl            String?  @default("/logo.png")
+  aboutTitle            String   @default("About NR Industrial Enterprises")
+  aboutDescription      String   @default("NR Industrial Enterprises is a leading manufacturer and supplier of high-quality industrial products. With a commitment to innovation and excellence, we provide solutions that meet the diverse needs of our clients across various industries.")
+  aboutExtended         String   @default("Backed by state-of-the-art manufacturing facilities, rigorous quality control protocols, and an experienced team of mechanical and industrial engineers, NR Industrial Enterprises delivers dependable components, assemblies, and heavy-duty equipment built to perform in demanding industrial environments.")
+  aboutMission          String   @default("To engineer, manufacture, and supply precision-grade industrial products that maximize operational reliability, safety, and efficiency for our global industrial partners.")
+  aboutVision           String   @default("To be the most trusted benchmark in industrial manufacturing through relentless innovation, sustainable engineering practices, and uncompromising quality standards.")
+  aboutImage            String?
+  establishedYear       String   @default("2008")
+  isoCertification      String   @default("ISO 9001:2015 Certified")
+  statsJson             String   @default("[{\"label\":\"Years of Excellence\",\"value\":\"18+\"},{\"label\":\"Industrial Products\",\"value\":\"500+\"},{\"label\":\"Enterprise Clients\",\"value\":\"1,200+\"},{\"label\":\"Quality Compliance\",\"value\":\"99.8%\"}]")
+
+  // Hero Section
+  heroBadge             String   @default("ISO 9001:2015 CERTIFIED MANUFACTURER & SUPPLIER")
+  heroTitle             String   @default("Engineered for Industrial Reliability & Peak Performance")
+  heroSubtitle          String   @default("NR Industrial Enterprises is a leading manufacturer and supplier of high-quality industrial products. With a commitment to innovation and excellence, we provide solutions that meet the diverse needs of our clients across various industries.")
+  heroImage             String?
+  heroPrimaryCtaText    String   @default("Explore Product Catalog")
+  heroPrimaryCtaLink    String   @default("/products")
+  heroSecondaryCtaText  String   @default("Request Custom Quote")
+  heroSecondaryCtaLink  String   @default("/contact")
+
+  // Contact & WhatsApp Details
+  whatsappNumber        String   @default("+919876543210")
+  whatsappDefaultMsg    String   @default("Hello NR Industrial Enterprises, I would like to enquire about your industrial products.")
+  adminEmail            String   @default("sales@nrindustrial.com")
+  supportEmail          String   @default("info@nrindustrial.com")
+  salesPhone            String   @default("+91 98765 43210")
+  supportPhone          String   @default("+91 22 4000 5000")
+  addressLine1          String   @default("Plot No. 42, Phase II, MIDC Industrial Area")
+  addressLine2          String   @default("Andheri East")
+  city                  String   @default("Mumbai")
+  state                 String   @default("Maharashtra")
+  postalCode            String   @default("400093")
+  country               String   @default("India")
+  workingHours          String   @default("Mon - Sat: 9:00 AM - 7:00 PM IST")
+  googleMapsEmbedUrl    String   @default("https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3769.960043050257!2d72.8697!3d19.1136!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTnCsDA2JzQ5LjAiTiA3MsKwNTInMTAuOSJF!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin")
+  linkedinUrl           String?
+  facebookUrl           String?
+  instagramUrl          String?
+  youtubeUrl            String?
+
+  // SMTP Configuration (Gmail SMTP / Nodemailer)
+  smtpHost              String   @default("smtp.gmail.com")
+  smtpPort              Int      @default(587)
+  smtpSecure            Boolean  @default(false)
+  smtpUser              String   @default("")
+  smtpPass              String   @default("")
+  smtpFromEmail         String   @default("sales@nrindustrial.com")
+  smtpFromName          String   @default("NR Industrial Enterprises")
+
+  // Cloudflare R2 Storage Configuration
+  r2AccountId           String   @default("")
+  r2AccessKeyId         String   @default("")
+  r2SecretAccessKey     String   @default("")
+  r2BucketName          String   @default("nr-industrial-assets")
+  r2PublicUrl           String   @default("")
+
+  // SEO & Footer
+  seoDefaultTitle       String   @default("NR Industrial Enterprises | Leading Manufacturer & Supplier of Industrial Products")
+  seoTitleTemplate      String   @default("%s | NR Industrial Enterprises")
+  seoDefaultDescription String   @default("NR Industrial Enterprises is a leading manufacturer and supplier of high-quality industrial products. With a commitment to innovation and excellence, we provide solutions that meet the diverse needs of our clients across various industries.")
+  seoDefaultKeywords    String   @default("NR Industrial Enterprises, industrial products manufacturer, industrial valves, hydraulic components, heavy duty fasteners, industrial automation, industrial supplier India")
+  seoOgImage            String?
+  footerText            String   @default("© 2026 NR Industrial Enterprises. All rights reserved. Engineered for Industrial Excellence.")
+
+  updatedAt             DateTime @updatedAt
+}
